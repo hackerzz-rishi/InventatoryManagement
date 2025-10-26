@@ -1,0 +1,28 @@
+{
+  "name": "inventory-management-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Inventory Management System",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@types/express-mysql-session": "^3.0.7",
+    "@types/express-session": "^1.18.2",
+    "bcryptjs": "^2.4.3",
+    "connect-mysql": "^4.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
