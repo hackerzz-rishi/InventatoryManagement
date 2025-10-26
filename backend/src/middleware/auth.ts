@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
+import { UserSession } from '../types/index.js';
+
 interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
+  user?: UserSession;
 }
 
 // Simple session-based authentication check

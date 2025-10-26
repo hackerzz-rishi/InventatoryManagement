@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Button from '@/components/Button';
-import api from '@/api/client';
+import { useAuth } from '@/context/AuthContext';
 
 interface LoginForm {
   username: string;
@@ -9,7 +9,7 @@ interface LoginForm {
 }
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState<LoginForm>({ username: '', password: '' });
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,10 +24,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/auth/login', form);
-      localStorage.setItem('token', response.data.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.data.user));
-      navigate('/dashboard');
+      await login(form.username, form.password);
     } catch (error: any) {
       setError(error.response?.data?.message || 'Login failed');
     } finally {

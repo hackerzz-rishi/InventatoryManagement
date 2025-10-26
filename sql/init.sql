@@ -2,6 +2,14 @@
 CREATE DATABASE IF NOT EXISTS inventory_management;
 USE inventory_management;
 
+-- Area Master (For grouping customers/deliveries)
+CREATE TABLE IF NOT EXISTS area_master (
+    area_id VARCHAR(10) PRIMARY KEY,
+    area_name VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Role Master
 CREATE TABLE IF NOT EXISTS role_master (
     role_id VARCHAR(10) PRIMARY KEY,
@@ -44,8 +52,10 @@ CREATE TABLE IF NOT EXISTS customer_master (
     phone VARCHAR(20),
     address TEXT,
     gst_number VARCHAR(20),
+    area_id VARCHAR(10),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (area_id) REFERENCES area_master(area_id)
 );
 
 -- GST Master
@@ -76,6 +86,8 @@ CREATE TABLE IF NOT EXISTS sales (
     sales_id VARCHAR(10) PRIMARY KEY,
     customer_id VARCHAR(10) NOT NULL,
     sale_date DATE NOT NULL,
+    sale_type VARCHAR(20) NOT NULL, -- 'Instore' or 'Delivery'
+    payment_mode VARCHAR(10), -- 'Cash', 'Online', 'UPI'
     total_amount DECIMAL(12,2) NOT NULL,
     gst_amount DECIMAL(10,2) NOT NULL,
     net_amount DECIMAL(12,2) NOT NULL,
@@ -166,6 +178,33 @@ CREATE TABLE IF NOT EXISTS payroll (
     FOREIGN KEY (created_by) REFERENCES user_master(user_id)
 );
 
+-- Petty Cash (For expense tracking)
+CREATE TABLE IF NOT EXISTS petty_cash (
+    pc_id VARCHAR(10) PRIMARY KEY,
+    pc_date DATE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    created_by VARCHAR(10) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES user_master(user_id)
+);
+
+-- Delivery Man Operations
+CREATE TABLE IF NOT EXISTS delivery_man_operations (
+    delivery_id VARCHAR(10) PRIMARY KEY,
+    sales_id VARCHAR(10) NOT NULL,             -- Maps to S_SN (Sales No)
+    employee_id VARCHAR(10) NOT NULL,          -- The delivery man (User)
+    dispatch_date DATE,                        -- Maps to DM_DD
+    delivered_date DATE,                       -- Maps to DM_DE
+    return_date DATE,                          -- Maps to DM_RD
+    mode_of_payment VARCHAR(10),               -- Maps to DM_PM (online/cash)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sales_id) REFERENCES sales(sales_id),
+    FOREIGN KEY (employee_id) REFERENCES user_master(user_id)
+);
+
 -- Insert default roles
 INSERT INTO role_master (role_id, role_name) VALUES
 ('ROLE_ADMIN', 'Administrator'),
@@ -182,3 +221,12 @@ INSERT INTO gst_master (gst_id, gst_percentage, description) VALUES
 ON DUPLICATE KEY UPDATE 
     gst_percentage = VALUES(gst_percentage),
     description = VALUES(description);
+
+-- Insert default areas
+INSERT INTO area_master (area_id, area_name) VALUES
+('AREA_001', 'North Zone'),
+('AREA_002', 'South Zone'),
+('AREA_003', 'East Zone'),
+('AREA_004', 'West Zone'),
+('AREA_005', 'Central Zone')
+ON DUPLICATE KEY UPDATE area_name = VALUES(area_name);
