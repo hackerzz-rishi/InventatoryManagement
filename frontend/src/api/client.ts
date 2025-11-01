@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
-const api = axios.create({
+export const apiClient = axios.create({
   baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
@@ -9,15 +9,13 @@ const api = axios.create({
 });
 
 // Response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthenticated requests
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Handle unauthenticated/unauthorized requests
       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
-
-export default api;

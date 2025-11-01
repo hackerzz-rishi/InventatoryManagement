@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Button from '@/components/Button';
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  Alert,
+  Stack
+} from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '@/context/AuthContext';
 
 interface LoginForm {
@@ -33,65 +43,97 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">{error}</div>
-            </div>
-          )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
-              <input
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mb: 3
+            }}
+          >
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: 'primary.main',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 1
+              }}
+            >
+              <LockOutlinedIcon sx={{ color: 'white' }} />
+            </Box>
+            <Typography component="h1" variant="h5">
+              Sign in to your account
+            </Typography>
+          </Box>
+
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              {error && (
+                <Alert severity="error" onClose={() => setError('')}>
+                  {error}
+                </Alert>
+              )}
+
+              <TextField
+                fullWidth
                 id="username"
                 name="username"
-                type="text"
+                label="Username"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
                 value={form.username}
                 onChange={handleChange}
+                autoComplete="username"
               />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
+
+              <TextField
+                fullWidth
                 id="password"
                 name="password"
+                label="Password"
                 type="password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
+                autoComplete="current-password"
               />
-            </div>
-          </div>
 
-          <div>
-            <Button
-              type="submit"
-              className="w-full"
-              variant="primary"
-              isLoading={isLoading}
-            >
-              Sign in
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                variant="contained"
+                fullWidth
+                size="large"
+                sx={{ mt: 2 }}
+              >
+                {isLoading ? 'Signing in...' : 'Sign in'}
+              </Button>
+
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Link to="/register" style={{ textDecoration: 'none' }}>
+                  <Typography color="primary">
+                    Don't have an account? Register
+                  </Typography>
+                </Link>
+              </Box>
+            </Stack>
+          </form>
+        </Paper>
+      </Box>
+    </Container>
   );
 };
 

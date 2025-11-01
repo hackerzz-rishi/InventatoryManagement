@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '@/api/client';
+import { apiClient } from '../api/client';
 
 interface User {
   id: string;
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (storedUser) {
         try {
           // Verify session is still valid
-          await api.get('/auth/verify');
+          await apiClient.get('/auth/check');
           setUser(JSON.parse(storedUser));
         } catch (error) {
           localStorage.removeItem('user');
@@ -59,11 +59,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const response = await apiClient.post('/auth/login', { username, password });
       const { user } = response.data.data;
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       throw error;
     }
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (data: RegisterData) => {
     try {
-      await api.post('/auth/register', data);
+      await apiClient.post('/auth/register', data);
       navigate('/login');
     } catch (error) {
       throw error;
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await apiClient.post('/auth/logout');
       localStorage.removeItem('user');
       setUser(null);
       navigate('/login');

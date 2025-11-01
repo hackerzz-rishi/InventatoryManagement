@@ -66,6 +66,11 @@ app.use(session({
   }
 }));
 
+// Mount routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/master', masterRoutes);
+app.use('/api/v1/transact', transactRoutes);
+
 // Basic route for testing
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Welcome to Inventory Management System API' });

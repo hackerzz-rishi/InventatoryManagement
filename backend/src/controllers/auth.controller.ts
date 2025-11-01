@@ -41,7 +41,7 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response) => {
       req.session.user = {
         id: user.user_id,
         username: user.username,
-        role: user.role_name
+        role: user.role_id
       };
     }
 
@@ -51,7 +51,7 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response) => {
         user: {
           id: user.user_id,
           username: user.username,
-          role: user.role_name
+          role: user.role_id
         }
       }
     });

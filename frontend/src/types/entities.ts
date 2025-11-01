@@ -39,10 +39,27 @@ export interface ICustomerMaster extends TimeStamps {
   gst_number: string | null;
 }
 
+export interface IAreaMaster extends TimeStamps {
+  area_id: string;
+  area_name: string;
+}
+
 export interface IGSTMaster extends TimeStamps {
   gst_id: string;
   gst_percentage: number;
-  description: string | null;
+  description: string;
+}
+
+export interface IPricingMaster extends TimeStamps {
+  pricing_id: string;
+  product_id: string;
+  unit_price: number;
+}
+
+export interface IGSTMaster extends TimeStamps {
+  gst_id: string;
+  gst_percentage: number;
+  description: string;
 }
 
 export interface IPricingMaster extends TimeStamps {

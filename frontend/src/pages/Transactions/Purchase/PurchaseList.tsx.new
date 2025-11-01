@@ -1,0 +1,156 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  IconButton
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Purchase } from '../../../types/transactions';
+import { getPurchases, deletePurchase } from '../../../api/transactions';
+import { useNotification } from '../../../context/NotificationContext';
+import ConfirmDialog from '../../../components/ConfirmDialog';
+
+const PurchaseList: React.FC = () => {
+  const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [purchaseToDelete, setPurchaseToDelete] = useState<Purchase | null>(null);
+
+  const handleDelete = (purchase: Purchase) => {
+    setPurchaseToDelete(purchase);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!purchaseToDelete) return;
+
+    try {
+      await deletePurchase(purchaseToDelete.purchase_id);
+      showNotification('Purchase deleted successfully', 'success');
+      setPurchases(prev => prev.filter(p => p.purchase_id !== purchaseToDelete.purchase_id));
+    } catch (error) {
+      console.error('Error deleting purchase:', error);
+      showNotification('Failed to delete purchase. Please try again later.', 'error');
+    } finally {
+      setDeleteDialogOpen(false);
+      setPurchaseToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPurchaseToDelete(null);
+  };
+
+  useEffect(() => {
+    const loadPurchases = async () => {
+      try {
+        setLoading(true);
+        const response = await getPurchases();
+        setPurchases(response.data);
+      } catch (error) {
+        console.error('Error loading purchases:', error);
+        showNotification('Failed to load purchases. Please try again later.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPurchases();
+  }, [showNotification]);
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Purchase List
+        </Typography>
+        <Button variant="contained" color="primary" onClick={() => navigate('/transactions/purchase/new')}>
+          New Purchase
+        </Button>
+      </div>
+      
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+          <CircularProgress />
+        </div>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Invoice Number</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Supplier</TableCell>
+                <TableCell align="right">Total Amount</TableCell>
+                <TableCell align="right">GST Amount</TableCell>
+                <TableCell align="right">Net Amount</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {purchases.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">No purchases found</TableCell>
+                </TableRow>
+              ) : (
+                purchases.map((purchase) => (
+                  <TableRow key={purchase.purchase_id}>
+                    <TableCell>{purchase.invoice_number}</TableCell>
+                    <TableCell>{new Date(purchase.invoice_date).toLocaleDateString()}</TableCell>
+                    <TableCell>{purchase.supplier_id}</TableCell>
+                    <TableCell align="right">{purchase.total_amount.toFixed(2)}</TableCell>
+                    <TableCell align="right">{purchase.gst_amount.toFixed(2)}</TableCell>
+                    <TableCell align="right">{purchase.net_amount.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => navigate(`/transactions/purchase/${purchase.purchase_id}`)}
+                          title="View"
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(purchase)}
+                          color="error"
+                          title="Delete"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete Purchase"
+        message={`Are you sure you want to delete purchase ${purchaseToDelete?.invoice_number}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        severity="error"
+      />
+    </div>
+  );
+};
+
+export default PurchaseList;
